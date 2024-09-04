@@ -1,7 +1,7 @@
 package com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -25,6 +25,9 @@ public class Client {
 
     private String name;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "client")
+    private Set<Invoice> invoices;
+
     @Column(name = "last_name")
     private String lastName;
 
@@ -34,10 +37,11 @@ public class Client {
         joinColumns = @JoinColumn(name = "client_id"), 
         inverseJoinColumns = @JoinColumn(name = "address_id"),
         uniqueConstraints = @UniqueConstraint(columnNames = {"address_id"}))
-    private List<Address> addresses;
+    private Set<Address> addresses;
 
     public Client() {
-        addresses = new ArrayList<>();
+        addresses = new HashSet<>();
+        invoices = new HashSet<>();
     }
 
     public Client(String name, String lastName) {
@@ -70,17 +74,36 @@ public class Client {
         this.lastName = lastName;
     }
 
-    public List<Address> getAddresses() {
+    public Set<Invoice> getInvoices() {
+        return invoices;
+    }
+
+    public void setInvoices(Set<Invoice> invoices) {
+        this.invoices = invoices;
+    }
+
+    public Set<Address> getAddresses() {
         return addresses;
     }
 
-    public void setAddresses(List<Address> addresses) {
+    public void setAddresses(Set<Address> addresses) {
         this.addresses = addresses;
+    }
+
+    public Client addInvoice(Invoice invoice) {
+        invoices.add(invoice);
+        invoice.setClient(this);
+        return this;
     }
 
     @Override
     public String toString() {
-        return "{id=" + id + ", name=" + name + ", lastName=" + lastName + ", addresses=" + addresses + "}";
+        return "{id=" + id +
+            ", name=" + name +
+            ", lastName=" + lastName + 
+            ", invoices=" + invoices +
+            ", addresses=" + addresses +
+             "}";
     }
 
 }
