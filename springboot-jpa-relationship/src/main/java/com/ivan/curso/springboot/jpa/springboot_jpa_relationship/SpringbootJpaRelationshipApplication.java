@@ -31,7 +31,36 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner{
 
 	@Override
 	public void run (String... args) throws Exception {
-		oneToManyInvoiceBidireccionalfindById();
+		removeInvoiceBidireccionalfindById();
+	}
+
+	// Eliminar una factura por id de un determinado cliente por id
+	@Transactional
+	public void removeInvoiceBidireccionalfindById() {
+		Optional<Client> optionalClient = clientRepository.findOne(2L);
+
+		optionalClient.ifPresent(client -> {
+			Invoice invoice = new Invoice("Compra ordenador", 5000L);
+			Invoice invoice2 = new Invoice("Compra mesa", 8000L);
+
+			client.addInvoice(invoice).addInvoice(invoice2);
+			clientRepository.save(client);
+			System.out.println("Factura del cliente:");
+			System.out.println(client);
+		});
+
+		Optional<Client> optionalClientDb = clientRepository.findOne(2L);
+
+		optionalClientDb.ifPresent(client -> {
+			Optional<Invoice> optionalInvoice = invoiceRepository.findById(2L);
+			optionalInvoice.ifPresent(invoice -> {
+				client.getInvoices().remove(invoice);
+				invoice.setClient(null);
+
+				clientRepository.save(client);
+				System.out.println(client);
+			});
+		});
 	}
 
 	@Transactional
