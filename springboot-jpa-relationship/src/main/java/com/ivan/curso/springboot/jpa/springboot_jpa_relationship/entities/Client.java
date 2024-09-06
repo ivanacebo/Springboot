@@ -6,12 +6,14 @@ import java.util.HashSet;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -38,6 +40,10 @@ public class Client {
         inverseJoinColumns = @JoinColumn(name = "address_id"),
         uniqueConstraints = @UniqueConstraint(columnNames = {"address_id"}))
     private Set<Address> addresses;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_details_id")
+    private ClientDetails clientDetails;
 
     public Client() {
         addresses = new HashSet<>();
@@ -90,6 +96,14 @@ public class Client {
         this.addresses = addresses;
     }
 
+    public ClientDetails getClientDetails() {
+        return clientDetails;
+    }
+
+    public void setClientDetails(ClientDetails clientDetails) {
+        this.clientDetails = clientDetails;
+    }
+
     public Client addInvoice(Invoice invoice) {
         invoices.add(invoice);
         invoice.setClient(this);
@@ -103,7 +117,8 @@ public class Client {
             ", lastName=" + lastName + 
             ", invoices=" + invoices +
             ", addresses=" + addresses +
-             "}";
+            ", clientDetails=" + clientDetails +
+            "}";
     }
 
 }

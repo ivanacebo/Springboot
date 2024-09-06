@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.Address;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.Client;
+import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.ClientDetails;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.Invoice;
+import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.repositories.ClientDetailsRepository;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.repositories.ClientRepository;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.repositories.InvoiceRepository;
 
@@ -25,13 +27,48 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner{
 	@Autowired
 	private InvoiceRepository invoiceRepository;
 
+	@Autowired
+	private ClientDetailsRepository clientDetailsRepository;
+
 	public static void main(String[] args) {
 		SpringApplication.run(SpringbootJpaRelationshipApplication.class, args);
 	}
 
 	@Override
 	public void run (String... args) throws Exception {
-		removeInvoiceBidireccionalfindById();
+		oneToOneFindById();
+	}
+
+	// Buscamos cliente por id y le añadimos sus detalles.
+	@Transactional
+	public void oneToOneFindById() {
+		ClientDetails clientDetails = new ClientDetails(true, 5000);
+		clientDetailsRepository.save(clientDetails);
+
+		Optional<Client> optionalClient = clientRepository.findOne(4L);
+
+		optionalClient.ifPresent(client -> {
+			client.setClientDetails(clientDetails);
+			clientRepository.save(client);
+
+			System.out.println("---- Cliente con sus detalles ----");
+			System.out.println(client);
+		});
+		
+	}
+
+	// Creamo cliente y sus detalles y lo añadimos al determinado cliente
+	@Transactional
+	public void oneToOne() {
+		ClientDetails clientDetails = new ClientDetails(true, 5000);
+		clientDetailsRepository.save(clientDetails);
+
+		Client client = new Client("Erba", "pura");
+		client.setClientDetails(clientDetails);
+		clientRepository.save(client);
+
+		System.out.println("---- Cliente con sus detalles ----");
+		System.out.println(client);
 	}
 
 	// Eliminar una factura por id de un determinado cliente por id
