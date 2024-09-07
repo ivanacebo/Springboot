@@ -13,10 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.Address;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.Client;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.ClientDetails;
+import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.Course;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.Invoice;
+import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.entities.Student;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.repositories.ClientDetailsRepository;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.repositories.ClientRepository;
 import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.repositories.InvoiceRepository;
+import com.ivan.curso.springboot.jpa.springboot_jpa_relationship.repositories.StudentRepository;
 
 @SpringBootApplication
 public class SpringbootJpaRelationshipApplication implements CommandLineRunner{
@@ -30,13 +33,64 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner{
 	@Autowired
 	private ClientDetailsRepository clientDetailsRepository;
 
+	@Autowired
+	private StudentRepository studentRepository;
+
 	public static void main(String[] args) {
 		SpringApplication.run(SpringbootJpaRelationshipApplication.class, args);
 	}
 
 	@Override
 	public void run (String... args) throws Exception {
-		oneToOneFindById();
+		manyToMany();
+	}
+
+	@Transactional
+	public void manyToMany() {
+		Student student = new Student("Ivan", "Perez");
+		Student student2 = new Student("Erba", "Doew");
+
+		Course course = new Course("Curso de Java Master", "Andres");
+		Course course2 = new Course("Curso de Spring Boot", "Andres");
+		
+		student.setCourses(Set.of(course, course2));
+		student2.setCourses(Set.of(course2));
+
+		studentRepository.saveAll(Set.of(student, student2));
+
+		System.out.println("--- Estudiante con sus cursos ---");
+		System.out.println(student);
+		System.out.println(student2);
+	}
+
+	// Buscamos cliente por id y le añadimos sus detalles.
+	@Transactional
+	private void onteToOneBidireccionalFindById() {
+		Optional <Client> optionalClient = clientRepository.findOne(2L);
+
+		optionalClient.ifPresent(client -> {
+			ClientDetails clientDetails = new ClientDetails(true, 5000);
+			client.setClientDetails(clientDetails);
+
+			clientRepository.save(client);
+			System.out.println("--- Cliente y su detalle ---" + " " + client.getName());
+			System.out.println(client);
+		});
+		
+	}
+
+	// Creamos un cliente con sus detalles de forma bidireccional
+	@Transactional
+	private void onteToOneBidireccional() {
+		Client client = new Client("Erba", "pura");
+		
+		ClientDetails clientDetails = new ClientDetails(true, 5000);
+
+		client.setClientDetails(clientDetails);
+
+		clientRepository.save(client);
+		System.out.println("--- Cliente y su detalle ---" + client.getName());
+		System.out.println(client);
 	}
 
 	// Buscamos cliente por id y le añadimos sus detalles.
